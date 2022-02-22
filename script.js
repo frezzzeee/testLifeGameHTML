@@ -1,13 +1,25 @@
 const settings = {
-  gameSize: [1000, 1000],
+  gameSize: [100, 100],
   interval: 1000,
-  pixelSize: 3
+  pixelSize: 10
 }
 
 const root = document.getElementById('root');
 root.addEventListener('click', firstGenerationHandler);
-let interval;
+root.innerHTML = `
+  <div class="canvas">
+    <canvas id="canvas"></canvas>
+  </div>
+  <button type="submit" class="btn btn-start">START</button>
+  <button type="submit" class="btn btn-stop hiden">STOP</button>
+`
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = settings.gameSize[0] * settings.pixelSize;
+canvas.height = settings.gameSize[1] * settings.pixelSize;
+ctx.fillStyle = 'green';
 
+let interval;
 let state = {
   figures: []
 }
@@ -33,63 +45,33 @@ function btnHandlers() {
 }
 
 function firstGenerationHandler(event) {
-  if (!event.target.classList.contains('field')) return;
-  const t = event.target;
-  const p = t.parentNode;
-  const pp = t.parentNode.parentNode;
-  const x = Array.from(p.children).findIndex(el => el === t);
-  const y = Array.from(pp.children).findIndex(el => el === p);
-  setGeneration([x, y]);
-}
-
-function createFields([x, y]) {
-  const fields = [];
-  for (let i = 0; i < y; i++) {
-    const innerFields = [];
-    for (let j = 0; j < x; j++) {
-      innerFields.push(`<div class="field" ></div>`);
-    }
-    fields.push(innerFields);
+  if (!event.target.id === 'canvas') return;
+  const x = event.layerX - (event.layerX % settings.pixelSize)
+  const y = event.layerY - (event.layerY % settings.pixelSize)
+  const checked = isAlreadyInState(state, [x, y]);
+  if (checked) {
+    state.figures = state.figures.filter(el => el !== checked);
+    ctx.clearRect(x, y, settings.pixelSize, settings.pixelSize)
+  } else {
+    state.figures.push([x, y]);
+    ctx.fillRect(x, y, settings.pixelSize, settings.pixelSize);
   }
-  
-  const coloumns = fields.map(innerFields => {
-    return `<div class="coloumn">${innerFields.join('')}</div>`;
-  });
-
-  root.innerHTML = `
-    <div class="main">${coloumns.join('')}</div>
-    <button type="submit" class="btn btn-start">START</button>
-    <button type="submit" class="btn btn-stop hiden">STOP</button>
-  `
 }
 
 function renderState(newState) {
   state.figures.forEach(figure => {
-    findField(figure).classList.remove('active');
+    const [x,y] = figure;
+    ctx.clearRect(x, y, settings.pixelSize, settings.pixelSize)
   });
   state = {...newState};
   state.figures.forEach(figure => {
-    findField(figure).classList.add('active');
+    const [x,y] = figure;
+    ctx.fillRect(x, y, settings.pixelSize, settings.pixelSize);
   });
 }
 
-function setGeneration([x, y]) {
-  const checked = checkStateFigures(state, [x, y]);
-  if (checked) {
-    state.figures = state.figures.filter(el => el !== checked);
-    findField([x, y]).classList.remove('active');
-  } else {
-    state.figures.push([x, y]);
-    findField([x, y]).classList.add('active');
-  }
-}
-
-function checkStateFigures(st, [x, y]) {
+function isAlreadyInState(st, [x, y]) {
   return st.figures.find(elements => elements[0] === x && elements[1] === y);
-}
-
-function findField([x, y]) {
-  return root.children[0].children[y].children[x];
 }
 
 function startGame() {
@@ -101,14 +83,15 @@ function stopGame() {
 }
 
 function getNeighbours([x, y]) {
+  const i = settings.pixelSize;
   const neighbours = [
-    [x-1, y-1], [x-1, y], [x-1, y+1],
-    [x, y-1], [x, y+1],
-    [x+1, y-1], [x+1, y], [x+1, y+1]
+    [x-i, y-i], [x-i, y], [x-i, y+i],
+    [x, y-i], [x, y+i],
+    [x+i, y-i], [x+i, y], [x+i, y+i]
   ];
   return neighbours.filter(n => 
-    n[0] > -1 && 
-    n[1] > -1 && 
+    n[0] > -i && 
+    n[1] > -i && 
     n[0] < settings.gameSize[0] && 
     n[1] < settings.gameSize[1]);
 }
@@ -120,21 +103,21 @@ function startLife() {
     const emptyNeighbours = [];
     const neighbours = getNeighbours(figure);
     for (let neighbour of neighbours) {
-      if (checkStateFigures(state, neighbour)) {
+      if (isAlreadyInState(state, neighbour)) {
         activeNeighbours.push(neighbour);
       } else {
         emptyNeighbours.push(neighbour);
       }
     }
     const length = activeNeighbours.length;
-    if ((length === 2 || length === 3) && !checkStateFigures(newState, figure)) {
+    if ((length === 2 || length === 3) && !isAlreadyInState(newState, figure)) {
       newState.figures.push(figure);
     }
 
     for (let neighbour of emptyNeighbours) {
       let innerActiveNeighbours = getNeighbours(neighbour);
-      innerActiveNeighbours = innerActiveNeighbours.filter(n => checkStateFigures(state, n));
-      if (innerActiveNeighbours.length === 3 && !checkStateFigures(newState, neighbour)) {
+      innerActiveNeighbours = innerActiveNeighbours.filter(n => isAlreadyInState(state, n));
+      if (innerActiveNeighbours.length === 3 && !isAlreadyInState(newState, neighbour)) {
         newState.figures.push(neighbour);
       }
     }
@@ -143,6 +126,5 @@ function startLife() {
 }
 
 (function() {
-  createFields(settings.gameSize);
   btnHandlers();
 })();

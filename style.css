@@ -1,0 +1,39 @@
+.coloumn {
+  display: flex;
+}
+
+.field {
+  background:black;
+  width:3px;
+  height:3px;
+  transition: all ease-in-out 0.25s;
+}
+
+.main {
+  display: inline-block;
+}
+
+.btn {
+  margin-top: 10px;
+  display: block;
+  border:none;
+  cursor: pointer;
+  color:white;
+  padding: 5px 20px;
+}
+
+.btn-start {
+  background: green;
+}
+
+.btn-stop {
+  background: red;
+}
+
+.active {
+  background: green;
+}
+
+.hiden {
+  display: none;
+}

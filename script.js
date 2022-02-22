@@ -1,6 +1,6 @@
 const settings = {
   gameSize: [100, 100],
-  interval: 1000,
+  interval: 200,
   pixelSize: 10
 }
 
@@ -68,6 +68,7 @@ function renderState(newState) {
     const [x,y] = figure;
     ctx.fillRect(x, y, settings.pixelSize, settings.pixelSize);
   });
+  console.log(state)
 }
 
 function isAlreadyInState(st, [x, y]) {
@@ -92,8 +93,8 @@ function getNeighbours([x, y]) {
   return neighbours.filter(n => 
     n[0] > -i && 
     n[1] > -i && 
-    n[0] < settings.gameSize[0] && 
-    n[1] < settings.gameSize[1]);
+    n[0] < settings.gameSize[0] * i && 
+    n[1] < settings.gameSize[1] * i);
 }
 
 function startLife() {

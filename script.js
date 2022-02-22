@@ -1,14 +1,14 @@
 const settings = {
   gameSize: [100, 100],
   interval: 200,
-  pixelSize: 10
+  pixelSize: 8
 }
 
 const root = document.getElementById('root');
 root.addEventListener('click', firstGenerationHandler);
 root.innerHTML = `
-  <div class="canvas">
-    <canvas id="canvas"></canvas>
+  <div class="container">
+    <canvas id="canvas" class="canvas"></canvas>
   </div>
   <button type="submit" class="btn btn-start">START</button>
   <button type="submit" class="btn btn-stop hiden">STOP</button>
@@ -45,7 +45,7 @@ function btnHandlers() {
 }
 
 function firstGenerationHandler(event) {
-  if (!event.target.id === 'canvas') return;
+  if (!event.target.classList.contains('canvas')) return;
   const x = event.layerX - (event.layerX % settings.pixelSize)
   const y = event.layerY - (event.layerY % settings.pixelSize)
   const checked = isAlreadyInState(state, [x, y]);
@@ -68,7 +68,6 @@ function renderState(newState) {
     const [x,y] = figure;
     ctx.fillRect(x, y, settings.pixelSize, settings.pixelSize);
   });
-  console.log(state)
 }
 
 function isAlreadyInState(st, [x, y]) {

@@ -9,8 +9,9 @@
   transition: all ease-in-out 0.25s;
 }
 
-.canvas {
+.container {
   background:black;
+  display: inline-block;
 }
 
 .main {
